@@ -254,7 +254,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             
-            // --- LLM Blueprint Generation Logic (RETAINED) ---
+            // --- LLM Blueprint Generation Logic ---
             const projectInput = document.getElementById('project-input');
             const generateButton = document.getElementById('generate-button');
             const loadingIndicator = document.getElementById('loading-indicator');
@@ -323,7 +323,8 @@ Suggested Deliverables:
                 document.body.appendChild(tempTextArea);
                 tempTextArea.select();
                 try {
-                    document.execCommand('copy');
+                    // Use execCommand('copy') for compatibility in embedded environments
+                    document.execCommand('copy'); 
                     
                     copyNotification.classList.remove('opacity-0', 'pointer-events-none');
                     copyNotification.classList.add('opacity-100');
@@ -364,6 +365,7 @@ Suggested Deliverables:
             };
 
             async function generateBlueprint(idea) {
+                // 1. Show loading state
                 loadingIndicator.classList.remove('hidden');
                 blueprintResult.classList.add('hidden');
                 generateButton.disabled = true;
@@ -371,7 +373,7 @@ Suggested Deliverables:
                 const userQuery = `Expand this project idea into a structured blueprint for a Business or Data Analyst portfolio project: "${idea}"`;
                 const systemPrompt = "You are a world-class Portfolio Architect AI. Your task is to take a high-level project idea and generate a specific, actionable project plan for a professional portfolio. Focus on clarity, business value, and measurable outcomes. The response MUST be a single JSON object conforming to the provided schema.";
                 
-                const apiKey = "";
+                const apiKey = ""; // Leave as-is
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                 
                 const payload = {
@@ -383,7 +385,7 @@ Suggested Deliverables:
                     }
                 };
                 
-                let response = null;
+                let responseData = null;
                 let parsedJson = null;
                 let retries = 0;
                 const maxRetries = 3;
@@ -403,28 +405,38 @@ Suggested Deliverables:
                             result.candidates[0].content.parts.length > 0) {
                             
                             const jsonText = result.candidates[0].content.parts[0].text;
+                            // Attempt to parse the JSON
                             parsedJson = JSON.parse(jsonText);
-                            response = parsedJson;
-                            break; 
+                            responseData = parsedJson;
+                            break; // Success
                         }
                     } catch (error) {
                         retries++;
+                        // Use exponential backoff for retries
                         if (retries < maxRetries) {
                             await new Promise(resolve => setTimeout(resolve, Math.pow(2, retries) * 1000));
                         } else {
                             console.error("API call failed after multiple retries:", error);
+                            // Fallthrough to handle error outside the loop
                         }
                     }
                 }
 
+                // 2. Hide loading state and re-enable button (MUST BE DONE ALWAYS)
                 loadingIndicator.classList.add('hidden');
                 generateButton.disabled = false;
 
-                if (response) {
-                    renderBlueprint(response);
+                // 3. Render result or error
+                if (responseData) {
+                    renderBlueprint(responseData);
                     document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
                 } else {
-                    blueprintContent.innerHTML = '<p class="text-red-600">Failed to generate blueprint. Please try a different idea or check your network connection.</p>';
+                    blueprintContent.innerHTML = `
+                        <div class="p-4 bg-red-100 border-l-4 border-red-500 rounded-lg text-red-800">
+                            <p class="font-bold">Generation Error:</p>
+                            <p>Failed to generate the blueprint after ${maxRetries} attempts. The service may be temporarily unavailable, or the input was too vague. Please try again or refine your project idea.</p>
+                        </div>
+                    `;
                     blueprintResult.classList.remove('hidden');
                 }
             }
@@ -433,6 +445,14 @@ Suggested Deliverables:
                 const idea = projectInput.value.trim();
                 if (idea) {
                     generateBlueprint(idea);
+                } else {
+                     blueprintContent.innerHTML = `
+                        <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 rounded-lg text-yellow-800">
+                            <p class="font-bold">Input Required:</p>
+                            <p>Please enter a project idea before clicking 'Generate Structured Blueprint'.</p>
+                        </div>
+                    `;
+                    blueprintResult.classList.remove('hidden');
                 }
             });
 
