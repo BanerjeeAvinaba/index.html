@@ -9,7 +9,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome for social media icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
@@ -31,7 +30,6 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <!-- Sticky Navigation/Header -->
     <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -52,18 +50,15 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        <!-- 1. HERO / ABOUT SECTION -->
         <section id="about" class="text-center mb-16 section-fade-in">
-            <!-- Profile Photo (Initials: AB) -->
             <img class="w-32 h-32 rounded-full mx-auto mb-6 object-cover shadow-lg" src="https://placehold.co/128x128/6366F1/FFFFFF?text=AB" alt="Profile Photo">
             
-           <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">Hi, I'm Avinaba Banerjee.</h1>
-<h2 class="mt-2 text-2xl font-semibold text-indigo-600">Data Analyst specializing in actionable insights and reporting automation.</h2>
-<p class="mt-6 max-w-3xl mx-auto text-lg text-gray-600">
-    I specialize in transforming raw data into strategic business solutions. With over 6 years of experience, I have managed operations and quality benchmarks for <strong class="text-gray-900">Uber</strong> and <strong class="text-gray-900">Aurora’s</strong> self-driving projects. I combine technical expertise in <strong class="text-gray-900">SQL</strong> and <strong class="text-gray-900">Looker Studio</strong> with strong leadership to drive vendor performance and automate reporting. My focus is on eliminating operational bottlenecks and delivering clear, data-driven insights for stakeholders.
-</p>
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">Hi, I'm Avinaba Banerjee.</h1>
+            <h2 class="mt-2 text-2xl font-semibold text-indigo-600">Data Analyst specializing in actionable insights and reporting automation.</h2>
+            <p class="mt-6 max-w-3xl mx-auto text-lg text-gray-600">
+                I specialize in transforming raw data into strategic business solutions. With over 6 years of experience, I have managed operations and quality benchmarks for <strong class="text-gray-900">Uber</strong> and <strong class="text-gray-900">Aurora’s</strong> self-driving projects. I combine technical expertise in <strong class="text-gray-900">SQL</strong> and <strong class="text-gray-900">Looker Studio</strong> with strong leadership to drive vendor performance and automate reporting. My focus is on eliminating operational bottlenecks and delivering clear, data-driven insights for stakeholders.
+            </p>
             
-            <!-- Contact Buttons -->
             <div class="mt-8 flex justify-center space-x-4">
                 <a 
                     href="http://linkedin.com/in/abaner1124" 
@@ -91,7 +86,6 @@
             </div>
         </section>
         
-        <!-- 2. SKILLS SECTION -->
         <section id="skills" class="mb-20 section-fade-in pt-12">
             <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">My Analytical Toolkit</h2>
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
@@ -123,7 +117,6 @@
             </div>
         </section>
 
-        <!-- 3. PROJECTS SECTION (The Core) -->
         <section id="projects" class="mb-20 section-fade-in pt-12">
             <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">Featured Case Studies</h2>
             
@@ -179,7 +172,6 @@
                     </div>
                 </a>
                 
-                <!-- Placeholder card to keep grid balanced -->
                 <div class="p-6 bg-gray-100 rounded-xl shadow-inner text-center flex items-center justify-center">
                     <p class="text-gray-600 italic">Looking for your next project? Use the <a href="#generator" class="text-indigo-600 font-semibold hover:underline">Blueprint Tool</a> below!</p>
                 </div>
@@ -187,20 +179,17 @@
             </div>
             
             <div class="mt-12 text-center">
-                <!-- Placeholder link for CV download -->
                 <a href="https://docs.google.com/document/d/1JWHT-mI6oBczTWUoREZcX-2wdEr77xM_LLpOzhPUD1M/edit?usp=sharing" target="_blank" class="px-6 py-3 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300 transition duration-150 shadow-sm">
                     Download Full Resume/CV
                 </a>
             </div>
         </section>
         
-        <!-- 4. PROJECT BLUEPRINT GENERATOR (Kept as a utility tool) -->
         <section id="generator" class="section-fade-in pt-12 pb-20">
             <h2 class="text-3xl font-bold text-gray-900 mb-2 text-center">Project Blueprint Generator ✨</h2>
             <p class="text-md text-gray-600 mb-6 text-center">Use this tool to plan out any new project ideas for your portfolio.</p>
 
             <div class="bg-white rounded-xl shadow-lg p-6 max-w-3xl mx-auto">
-                <!-- API KEY INPUT FIELD -->
                 <div class="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg">
                     <p class="text-sm font-semibold text-yellow-800 mb-2">
                         ‼️ API Key Required: If the generator is stuck loading, enter your personal Gemini API Key below to establish a direct connection. <br>
@@ -237,9 +226,7 @@
                         </button>
                     </div>
                     <div id="blueprint-content" class="space-y-4">
-                        <!-- Blueprint details will be inserted here -->
-                    </div>
-                    <!-- Notification for copy action -->
+                        </div>
                     <div id="copy-notification" class="fixed bottom-5 right-5 bg-green-500 text-white px-4 py-2 rounded-lg shadow-xl transition-opacity duration-300 opacity-0 pointer-events-none">
                         Blueprint copied to clipboard!
                     </div>
@@ -270,10 +257,12 @@
             const apiKeyInput = document.getElementById('api-key-input');
             const apiKeyStatus = document.getElementById('api-key-status');
 
-            const modelName = 'gemini-2.5-flash-preview-05-20';
+            // --- IMPORTANT: USING STABLE GEMINI MODEL ---
+            const modelName = 'gemini-1.5-flash'; 
             const maxRetries = 3;
 
             // Retrieve API key from local storage or use the default empty string
+            // --- SECURITY NOTE: Keep this string empty! Do not paste your key here. ---
             let currentApiKey = localStorage.getItem('geminiApiKey') || "";
 
             // Set input value if a key is stored
