@@ -192,8 +192,8 @@
             <div class="bg-white rounded-xl shadow-lg p-6 max-w-3xl mx-auto">
                 <div class="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg">
                     <p class="text-sm font-semibold text-yellow-800 mb-2">
-                        ‼️ API Key Required: If the generator is stuck loading, enter your personal Gemini API Key below to establish a direct connection. <br>
-                        Please visit 🌐 https://aistudio.google.com/ > generate API Key 🔑 (If not already created) > Copy key > Paste Here:
+                        ‼️ API Key Required for Real AI: If the generator is stuck loading, enter your personal Gemini API Key below.<br>
+                        Please visit 🌐 https://aistudio.google.com/ > generate API Key 🔑 > Paste Here:
                     </p>
                     <input 
                         type="password" 
@@ -207,7 +207,7 @@
                 <div id="api-status-message" class="mb-4 hidden p-3 rounded-lg text-sm font-medium"></div>
 
                 <label for="project-input" class="block text-lg font-semibold text-gray-800 mb-3">Your Project Idea:</label>
-                <textarea id="project-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150" placeholder="e.g., Analyzing employee satisfaction and turnover rates for a large corporation, or optimizing a logistics process..."></textarea>
+                <textarea id="project-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150" placeholder="e.g., Analyzing employee satisfaction and turnover rates..."></textarea>
                 
                 <button id="generate-button" class="mt-4 w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition duration-150 transform hover:scale-[1.01] shadow-md hover:shadow-lg">
                     ✨ Generate Structured Blueprint
@@ -257,41 +257,34 @@
             const apiKeyInput = document.getElementById('api-key-input');
             const apiKeyStatus = document.getElementById('api-key-status');
 
-            // --- IMPORTANT: USING STABLE GEMINI MODEL ---
+            // --- SETTINGS ---
             const modelName = 'gemini-1.5-flash'; 
             const maxRetries = 3;
 
-            // Retrieve API key from local storage or use the default empty string
-            // --- SECURITY NOTE: Keep this string empty! Do not paste your key here. ---
+            // --- API Key Logic ---
             let currentApiKey = localStorage.getItem('geminiApiKey') || "";
 
-            // Set input value if a key is stored
             if (currentApiKey) {
-                apiKeyInput.value = ""; // Mask the displayed value
+                apiKeyInput.value = ""; 
                 apiKeyStatus.textContent = "Using stored API Key for direct access.";
             } else {
-                apiKeyStatus.textContent = "Using default environment key (if available).";
+                apiKeyStatus.textContent = "No API Key found. Tool will run in SIMULATION MODE.";
             }
             
-            // --- API Key Handling ---
             apiKeyInput.addEventListener('change', () => {
                 const newKey = apiKeyInput.value.trim();
-                if (newKey && !newKey.startsWith("")) {
+                if (newKey) {
                     currentApiKey = newKey;
                     localStorage.setItem('geminiApiKey', newKey);
                     apiKeyInput.value = "";
-                    apiKeyStatus.textContent = "New API Key stored and activated!";
-                    checkApiStatus(); // Re-check status with the new key
-                } else if (newKey.startsWith("")) {
-                     apiKeyStatus.textContent = "Using stored API Key for direct access.";
+                    apiKeyStatus.textContent = "New API Key stored! Real AI Mode activated.";
+                    checkApiStatus(); 
                 } else {
                     currentApiKey = "";
                     localStorage.removeItem('geminiApiKey');
-                    apiKeyStatus.textContent = "Using default environment key (if available).";
-                    checkApiStatus(); // Re-check status without a key
+                    apiKeyStatus.textContent = "No API Key. Tool will run in SIMULATION MODE.";
                 }
             });
-
 
             // --- Helper Functions ---
 
@@ -302,17 +295,18 @@
 
             function displayApiStatus(message, type = 'info') {
                 apiStatusMessage.textContent = message;
-                apiStatusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800', 'bg-indigo-100', 'text-indigo-800');
+                apiStatusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800', 'bg-indigo-100', 'text-indigo-800', 'bg-yellow-100', 'text-yellow-800');
+                
                 if (type === 'error') {
                     apiStatusMessage.classList.add('bg-red-100', 'text-red-800');
-                    generateButton.disabled = true;
                 } else if (type === 'success') {
                     apiStatusMessage.classList.add('bg-green-100', 'text-green-800');
-                    generateButton.disabled = false;
+                } else if (type === 'warning') {
+                     apiStatusMessage.classList.add('bg-yellow-100', 'text-yellow-800');
                 } else { // info
                     apiStatusMessage.classList.add('bg-indigo-100', 'text-indigo-800');
-                    generateButton.disabled = false; // Assume ready unless connection check fails
                 }
+                apiStatusMessage.classList.remove('hidden');
             }
 
             function renderBlueprint(data) {
@@ -350,7 +344,6 @@
                 `;
                 blueprintContent.innerHTML = htmlContent;
                 
-                // Store the plain text version of the blueprint for copying
                 blueprintContent.dataset.plaintext = `
 Project Title: ${data.title}
 --------------------------------------------------
@@ -367,205 +360,134 @@ Suggested Deliverables:
                 `.trim();
             }
 
-
-            // --- Core API Call Logic ---
-
-            const payloadSchema = {
-                type: "OBJECT",
-                properties: {
-                    "title": { "type": "STRING", "description": "The refined, specific project title." },
-                    "businessQuestion": { "type": "STRING", "description": "The precise business question this project aims to answer, phrased clearly." },
-                    "keyMetrics": { 
-                        "type": "ARRAY", 
-                        "description": "3-4 key performance indicators (KPIs) relevant to the project and used in the analysis.",
-                        "items": { "type": "STRING" }
-                    },
-                    "dataTypes": { 
-                        "type": "ARRAY", 
-                        "description": "3 types of data needed for this analysis (e.g., transactional records, demographic data, web log data, process flow diagrams).",
-                        "items": { "type": "STRING" }
-                    },
-                    "deliverables": { 
-                        "type": "ARRAY", 
-                        "description": "2-3 final outputs/artifacts (e.g., Interactive Dashboard, Technical Documentation, Final Recommendation Report, Predictive Model).",
-                        "items": { "type": "STRING" }
-                    }
-                },
-                "propertyOrdering": ["title", "businessQuestion", "keyMetrics", "dataTypes", "deliverables"]
-            };
-
+            // --- API Status Check ---
             async function checkApiStatus() {
-                displayApiStatus("Checking API connection status...", 'info');
+                if (!currentApiKey) return; // Skip check if no key (Demo mode is assumed OK)
                 
-                // This is a lightweight check using a sample query to see if the API is reachable
                 const dummyPayload = {
-                    contents: [{ parts: [{ text: "check connection" }] }],
-                    generationConfig: { maxOutputTokens: 10 }
+                    contents: [{ parts: [{ text: "check" }] }],
+                    generationConfig: { maxOutputTokens: 1 }
                 };
-
                 try {
                     const fetchResponse = await fetch(getApiUrl(), {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(dummyPayload)
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dummyPayload)
                     });
-
                     if (fetchResponse.ok) {
-                        displayApiStatus("API connection stable. The Blueprint Generator is ready!", 'success');
-                        return true;
-                    } else {
-                        throw new Error(`API returned status ${fetchResponse.status}`);
+                        displayApiStatus("API Key active! Real AI generation ready.", 'success');
                     }
                 } catch (error) {
-                    const message = "Connection Error: Cannot reach the Gemini API endpoint. Please check your API Key or try again later.";
-                    displayApiStatus(message, 'error');
-                    console.error("API Status Check Failed:", error);
-                    return false;
+                    displayApiStatus("API Key invalid or connection failed. Reverting to Simulation Mode.", 'error');
                 }
             }
 
-
+            // --- GENERATION LOGIC (WITH AUTONOMOUS DRIVING SIMULATION) ---
             async function generateBlueprint(idea) {
-                if (generateButton.disabled) {
-                    displayApiStatus("Generator is disabled due to a previous connection error. Check your API key and refresh to try again.", 'error');
-                    return;
-                }
-
                 loadingIndicator.classList.remove('hidden');
                 blueprintResult.classList.add('hidden');
                 generateButton.disabled = true;
 
-                const userQuery = `Expand this project idea into a structured blueprint for a Business or Data Analyst portfolio project: "${idea}"`;
-                const systemPrompt = "You are a world-class Portfolio Architect AI. Your task is to take a high-level project idea and generate a specific, actionable project plan for a professional portfolio. Focus on clarity, business value, and measurable outcomes. The response MUST be a single JSON object conforming to the provided schema.";
-                
-                const payload = {
-                    contents: [{ parts: [{ text: userQuery }] }],
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: payloadSchema
+                // *** SIMULATION MODE TRIGGER ***
+                if (!currentApiKey) {
+                    console.log("No API Key detected. Running Simulation Mode.");
+                    
+                    // 1. Notify user immediately
+                    displayApiStatus("⚠️ No API Key detected. Running a simulation to show how this feature works...", 'warning');
+                    
+                    setTimeout(() => {
+                        // 2. Autonomous Driving Mock Data
+                        const demoData = {
+                            "title": "Autonomous Fleet: HD Map Accuracy & Safety Optimization",
+                            "businessQuestion": "How can we reduce map update turnaround time (TAT) by 20% while maintaining 99.9% label accuracy for safety-critical road features?",
+                            "keyMetrics": ["Labeling Throughput (Objects/Hour)", "Critical Error Rate (Safety Disengagements)", "Map Update Latency", "Vendor QA Pass Rate"],
+                            "dataTypes": ["3D LiDAR Point Clouds", "Vehicle Sensor Telemetry Logs", "Human Annotator Performance Records", "Road Incident/Disengagement Reports"],
+                            "deliverables": ["Automated Quality Assurance (QA) Dashboard", "Operational Bottleneck Analysis Report", "Vendor Calibration & Training Module"]
+                        };
+                        
+                        renderBlueprint(demoData);
+                        displayApiStatus("✨ Simulation Complete! (This is a sample result. Enter a valid API Key to generate real plans.)", 'success');
+                        loadingIndicator.classList.add('hidden');
+                        generateButton.disabled = false;
+                        document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
+                    }, 2500); // 2.5 second simulated delay
+                    
+                    return; // Stop here, don't call Google
+                }
+
+                // *** REAL AI MODE ***
+                displayApiStatus("Generating your blueprint with Gemini AI...", 'info');
+
+                const payloadSchema = {
+                    type: "OBJECT",
+                    properties: {
+                        "title": { "type": "STRING" },
+                        "businessQuestion": { "type": "STRING" },
+                        "keyMetrics": { "type": "ARRAY", "items": { "type": "STRING" } },
+                        "dataTypes": { "type": "ARRAY", "items": { "type": "STRING" } },
+                        "deliverables": { "type": "ARRAY", "items": { "type": "STRING" } }
                     }
                 };
                 
-                let responseData = null;
-                let retries = 0;
-                
-                while (retries < maxRetries) {
-                    try {
-                        const fetchResponse = await fetch(getApiUrl(), {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
+                const userQuery = `Create a data analyst portfolio project plan for: "${idea}"`;
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    generationConfig: { responseMimeType: "application/json", responseSchema: payloadSchema }
+                };
 
-                        if (!fetchResponse.ok) {
-                            throw new Error(`HTTP error! status: ${fetchResponse.status}`);
-                        }
+                try {
+                    const fetchResponse = await fetch(getApiUrl(), {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                    });
 
-                        const result = await fetchResponse.json();
-
-                        if (result.candidates && result.candidates.length > 0 && 
-                            result.candidates[0].content && result.candidates[0].content.parts &&
-                            result.candidates[0].content.parts.length > 0) {
-                            
-                            const jsonText = result.candidates[0].content.parts[0].text;
-                            // Attempt to parse the JSON
-                            responseData = JSON.parse(jsonText);
-                            break; // Success
-                        }
-                    } catch (error) {
-                        retries++;
-                        if (retries < maxRetries) {
-                            // Exponential backoff
-                            await new Promise(resolve => setTimeout(resolve, Math.pow(2, retries) * 1000));
-                        } else {
-                            console.error("API call failed after multiple retries:", error);
-                        }
-                    }
-                }
-
-                // --- Finalizing State ---
-                loadingIndicator.classList.add('hidden');
-                
-                // Re-enable button only if API check passed initially
-                if (apiStatusMessage.classList.contains('bg-green-100')) {
-                    generateButton.disabled = false; 
-                }
-
-
-                if (responseData) {
+                    if (!fetchResponse.ok) throw new Error("API Error");
+                    const result = await fetchResponse.json();
+                    const jsonText = result.candidates[0].content.parts[0].text;
+                    const responseData = JSON.parse(jsonText);
+                    
                     renderBlueprint(responseData);
                     displayApiStatus("Blueprint generated successfully!", 'success');
                     document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    blueprintContent.innerHTML = `
-                        <div class="p-4 bg-red-100 border-l-4 border-red-500 rounded-lg text-red-800">
-                            <p class="font-bold">Generation Failed:</p>
-                            <p>Could not generate a valid blueprint after ${maxRetries} attempts. Please ensure your API Key is correct, or try a simpler project idea.</p>
-                        </div>
-                    `;
-                    blueprintResult.classList.remove('hidden');
-                    displayApiStatus("Generation failed. Check the error message above.", 'error');
+
+                } catch (error) {
+                    console.error(error);
+                    displayApiStatus("Real AI Generation Failed. Check your API Key.", 'error');
+                } finally {
+                    loadingIndicator.classList.add('hidden');
+                    generateButton.disabled = false;
                 }
             }
 
-
-            // --- Event Listeners and Initialization ---
-
+            // --- Event Listeners ---
             generateButton.addEventListener('click', () => {
                 const idea = projectInput.value.trim();
                 if (idea) {
                     generateBlueprint(idea);
                 } else {
-                     blueprintContent.innerHTML = `
-                        <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 rounded-lg text-yellow-800">
-                            <p class="font-bold">Input Required:</p>
-                            <p>Please enter a project idea before clicking 'Generate Structured Blueprint'.</p>
-                        </div>
-                    `;
-                    blueprintResult.classList.remove('hidden');
+                    alert("Please enter a project idea first.");
                 }
             });
 
             copyButton.addEventListener('click', () => {
                 const textToCopy = blueprintContent.dataset.plaintext;
-                
                 const tempTextArea = document.createElement('textarea');
                 tempTextArea.value = textToCopy;
                 document.body.appendChild(tempTextArea);
                 tempTextArea.select();
                 try {
                     document.execCommand('copy'); 
-                    
                     copyNotification.classList.remove('opacity-0', 'pointer-events-none');
                     copyNotification.classList.add('opacity-100');
                     setTimeout(() => {
                         copyNotification.classList.remove('opacity-100');
                         copyNotification.classList.add('opacity-0', 'pointer-events-none');
                     }, 2000);
-
                 } catch (err) {
                     console.error('Could not copy text: ', err);
                 }
                 document.body.removeChild(tempTextArea);
             });
-
-
-            // Initial status check on load
-            checkApiStatus();
-
-            // --- FADE IN OBSERVER (RETAINED) ---
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.1 });
-
-            document.querySelectorAll('.section-fade-in').forEach(section => {
-                observer.observe(section);
-            });
+            
+            // Initial check
+            if (currentApiKey) checkApiStatus();
         });
     </script>
 </body>
