@@ -122,32 +122,39 @@
             transition: fill 0.3s ease;
         }
 
-        /* === MOBILE MENU STYLES === */
+        /* === MOBILE MENU STYLES (UPDATED) === */
         #mobile-menu {
             transition: opacity 0.3s ease, visibility 0.3s;
+            /* Ensure it sits on top */
+            z-index: 40;
         }
 
-        /* The frosted gradient background layer */
-        .mobile-menu-frost {
+        /* This is the dark, blurred background layer */
+        .mobile-menu-backdrop {
             position: absolute;
-            inset: 0;
-            z-index: -1;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 85vh; /* Covers top 85% of screen */
             
-            /* Gradient: Dark & Opaque at Top -> Transparent at Bottom */
-            background: linear-gradient(to bottom, 
-                rgba(0,0,0,0.95) 0%, 
-                rgba(0,0,0,0.85) 40%, 
-                rgba(0,0,0,0.4) 70%, 
-                rgba(0,0,0,0) 100%
+            /* Gradient: Very dark at top, fading out at bottom */
+            background: linear-gradient(
+                to bottom, 
+                rgba(5, 5, 7, 0.98) 0%, 
+                rgba(5, 5, 7, 0.95) 50%, 
+                rgba(5, 5, 7, 0.0) 100%
             );
 
-            /* Blur effect */
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            /* The Blur Effect */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
 
-            /* Mask to make the blur fade out at the bottom */
-            -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            /* Mask to soften the bottom edge */
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            
+            z-index: -1; /* Behind the text */
+            pointer-events: none; /* Let clicks pass through if needed */
         }
 
         .menu-open {
@@ -181,16 +188,17 @@
             </button>
         </div>
 
-        <div id="mobile-menu" class="fixed inset-0 z-40 menu-hidden flex flex-col items-center pt-32 space-y-8">
-            <div class="mobile-menu-frost"></div>
-
-            <a href="#about" class="text-2xl font-bold text-gray-200 hover:text-white" onclick="toggleMenu()">About</a>
-            <a href="#projects" class="text-2xl font-bold text-gray-200 hover:text-white" onclick="toggleMenu()">Projects</a>
-            <a href="#experience" class="text-2xl font-bold text-gray-200 hover:text-white" onclick="toggleMenu()">Experience</a>
-            <a href="https://docs.google.com/document/d/1JWHT-mI6oBczTWUoREZcX-2wdEr77xM_LLpOzhPUD1M/edit?usp=sharing" target="_blank" class="text-2xl font-bold text-blue-500" onclick="toggleMenu()">Resume</a>
-            <a href="mailto:avinaba48@gmail.com" class="text-2xl font-bold text-blue-500" onclick="toggleMenu()">Get in touch</a>
+        <div id="mobile-menu" class="fixed inset-0 menu-hidden flex flex-col items-center justify-start pt-24 space-y-6">
             
-            <button class="absolute top-6 right-6 text-gray-300 hover:text-white p-2" onclick="toggleMenu()">
+            <div class="mobile-menu-backdrop"></div>
+
+            <a href="#about" class="text-3xl font-bold text-gray-200 hover:text-white z-50" onclick="toggleMenu()">About</a>
+            <a href="#projects" class="text-3xl font-bold text-gray-200 hover:text-white z-50" onclick="toggleMenu()">Projects</a>
+            <a href="#experience" class="text-3xl font-bold text-gray-200 hover:text-white z-50" onclick="toggleMenu()">Experience</a>
+            <a href="https://docs.google.com/document/d/1JWHT-mI6oBczTWUoREZcX-2wdEr77xM_LLpOzhPUD1M/edit?usp=sharing" target="_blank" class="text-3xl font-bold text-blue-500 z-50" onclick="toggleMenu()">Resume</a>
+            <a href="mailto:avinaba48@gmail.com" class="text-3xl font-bold text-blue-500 z-50" onclick="toggleMenu()">Get in touch</a>
+            
+            <button class="absolute top-6 right-6 text-gray-300 hover:text-white p-2 z-50" onclick="toggleMenu()">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
