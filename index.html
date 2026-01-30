@@ -121,13 +121,51 @@
             height: 20px;
             transition: fill 0.3s ease;
         }
+
+        /* === MOBILE MENU STYLES === */
+        #mobile-menu {
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        /* The frosted gradient background layer */
+        .mobile-menu-frost {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            
+            /* Gradient: Dark & Opaque at Top -> Transparent at Bottom */
+            background: linear-gradient(to bottom, 
+                rgba(0,0,0,0.95) 0%, 
+                rgba(0,0,0,0.85) 40%, 
+                rgba(0,0,0,0.4) 70%, 
+                rgba(0,0,0,0) 100%
+            );
+
+            /* Blur effect */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+
+            /* Mask to make the blur fade out at the bottom */
+            -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+        }
+
+        .menu-open {
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        .menu-hidden {
+            visibility: hidden;
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
 
-    <nav class="fixed top-0 w-full z-50 nav-glass border-b border-white/5">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <nav class="fixed top-0 w-full z-50 border-b border-white/5 nav-glass">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center relative z-50">
             <span class="text-xl font-bold tracking-tight text-white">AVINABA<span class="text-blue-500">.</span></span>
+            
             <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
                 <a href="#about" class="hover:text-white transition-colors">About</a>
                 <a href="#projects" class="hover:text-white transition-colors">Projects</a>
@@ -135,6 +173,28 @@
                 <a href="https://docs.google.com/document/d/1JWHT-mI6oBczTWUoREZcX-2wdEr77xM_LLpOzhPUD1M/edit?usp=sharing" target="_blank" class="text-blue-500 hover:text-blue-400">Resume</a>
                 <a href="mailto:avinaba48@gmail.com" class="text-blue-500 hover:text-blue-400">Get in touch</a>
             </div>
+
+            <button id="menu-btn" class="md:hidden text-white focus:outline-none p-2">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div id="mobile-menu" class="fixed inset-0 z-40 menu-hidden flex flex-col items-center pt-32 space-y-8">
+            <div class="mobile-menu-frost"></div>
+
+            <a href="#about" class="text-2xl font-bold text-gray-200 hover:text-white" onclick="toggleMenu()">About</a>
+            <a href="#projects" class="text-2xl font-bold text-gray-200 hover:text-white" onclick="toggleMenu()">Projects</a>
+            <a href="#experience" class="text-2xl font-bold text-gray-200 hover:text-white" onclick="toggleMenu()">Experience</a>
+            <a href="https://docs.google.com/document/d/1JWHT-mI6oBczTWUoREZcX-2wdEr77xM_LLpOzhPUD1M/edit?usp=sharing" target="_blank" class="text-2xl font-bold text-blue-500" onclick="toggleMenu()">Resume</a>
+            <a href="mailto:avinaba48@gmail.com" class="text-2xl font-bold text-blue-500" onclick="toggleMenu()">Get in touch</a>
+            
+            <button class="absolute top-6 right-6 text-gray-300 hover:text-white p-2" onclick="toggleMenu()">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
         </div>
     </nav>
 
@@ -321,7 +381,25 @@
     </footer>
 
     <script>
-        // 1. Smooth Scroll Setup
+        // 1. Mobile Menu Toggle Logic
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        function toggleMenu() {
+            if (mobileMenu.classList.contains('menu-hidden')) {
+                mobileMenu.classList.remove('menu-hidden');
+                mobileMenu.classList.add('menu-open');
+            } else {
+                mobileMenu.classList.remove('menu-open');
+                mobileMenu.classList.add('menu-hidden');
+            }
+        }
+
+        // Attach event listener
+        menuBtn.addEventListener('click', toggleMenu);
+
+
+        // 2. Smooth Scroll Setup
         const lenis = new Lenis({
             duration: 1.2,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -337,13 +415,13 @@
 
         gsap.registerPlugin(ScrollTrigger);
 
-        // 2. Hero Animations
+        // 3. Hero Animations
         const tl = gsap.timeline();
         tl.to("#hero-img", { opacity: 1, scale: 1, duration: 1.5, ease: "power4.out" })
           .to("#hero-text", { opacity: 1, y: 0, duration: 1.5, ease: "power4.out" }, "-=1")
           .to("#hero-sub", { opacity: 1, duration: 1.5 }, "-=1");
 
-        // 3. Text Reveal Effect
+        // 4. Text Reveal Effect
         gsap.utils.toArray('.reveal-text').forEach(text => {
             gsap.fromTo(text, 
                 { opacity: 0.2, y: 50 },
@@ -359,7 +437,7 @@
             );
         });
 
-        // 4. Experience Animation
+        // 5. Experience Animation
         const expCard = document.querySelector('.exp-card');
         const metric = document.querySelector('.metric-display');
 
@@ -395,7 +473,7 @@
             }
         }
 
-        // 5. Mouse Orb Movement
+        // 6. Mouse Orb Movement
         document.addEventListener('mousemove', (e) => {
             const x = (e.clientX / window.innerWidth - 0.5) * 20;
             const y = (e.clientY / window.innerHeight - 0.5) * 20;
